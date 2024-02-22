@@ -16,7 +16,7 @@ public class MazeBrain {
 
     }
 
-    public boolean traverseMaze(int x, int y) {
+    public boolean blindTraverseMaze(int x, int y) {
         //printMaze();
         if (maze.get(y).get(x) == 'G') {
             System.out.println("Found end at: " + x + "," + y);
@@ -35,7 +35,7 @@ public class MazeBrain {
         //set current position as explored
         maze.get(y).set(x, 'o');
         //explore neighbour cells. 1 right, 1 left, 1 up, 1 down - this is the order it checks
-        if (traverseMaze(x + 1, y) || traverseMaze(x - 1, y) || traverseMaze(x, y + 1) || traverseMaze(x, y - 1)) {
+        if (blindTraverseMaze(x + 1, y) || blindTraverseMaze(x - 1, y) || blindTraverseMaze(x, y + 1) || blindTraverseMaze(x, y - 1)) {
             return true;
         }
         //if this was dead end - set back to whitespace
@@ -44,13 +44,46 @@ public class MazeBrain {
         return false;
     }
 
-    public void printPath() {
-        for (ArrayList<Character> row : maze) {
-            for (char cell : row) {
-                System.out.print(cell);
-            }
-            System.out.println();
+    public boolean bestFirstTraverseMaze(ArrayList<Tile> tiles) {
+        printAndWait(500); // 500 is good
+
+        if (tiles.isEmpty()) {
+            Tile tile = new Tile(3, 3, 0); //TODO hardcode start value
+            tiles.add(tile);
+            //return bestFirstTraverseMaze(tiles);
         }
+        //current tile
+        Tile currentTile = tiles.get(0);
+
+        //check if goal reached
+        if (maze.get(currentTile.y).get(currentTile.x) == 'G') {
+            System.out.println("Found end at: " + currentTile.x + "," + currentTile.y);
+            return true;
+        }
+        //check if current position is wall
+        if (maze.get(currentTile.y).get(currentTile.x) == '*') {
+            System.out.println("Wall at: " + currentTile.x + "," + currentTile.y);
+            tiles.remove(currentTile);
+            return bestFirstTraverseMaze(tiles);
+        }
+        if (maze.get(currentTile.y).get(currentTile.x) == 'o') {
+            System.out.println("Was here before: " + currentTile.x + "," + currentTile.y);
+            tiles.remove(currentTile);
+            return bestFirstTraverseMaze(tiles);
+        }
+        //add adjacent tiles to list - price goes up by 1
+        tiles.add(new Tile(currentTile.x + 1, currentTile.y, currentTile.price + 1));
+        tiles.add(new Tile(currentTile.x, currentTile.y + 1, currentTile.price + 1));
+        tiles.add(new Tile(currentTile.x - 1, currentTile.y, currentTile.price + 1));
+        tiles.add(new Tile(currentTile.x, currentTile.y - 1, currentTile.price + 1));
+
+        //mark the current tile as visited
+        maze.get(currentTile.y).set(currentTile.x, 'o');
+
+        //remove the tile from the list
+        tiles.remove(currentTile);
+
+        return bestFirstTraverseMaze(tiles);
     }
 
     public void readMazeFromFile(String filePath) {//from gpt
@@ -77,4 +110,12 @@ public class MazeBrain {
         }
     }
 
+    public void printAndWait(int milliSecondsToWait){
+        printMaze();
+        try {
+            Thread.sleep(milliSecondsToWait);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }
