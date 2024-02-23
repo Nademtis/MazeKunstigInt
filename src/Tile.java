@@ -8,4 +8,8 @@ public class Tile {
         this.x = x;
         this.price = price;
     }
+
+    public int getPrice() {
+        return price;
+    }
 }
