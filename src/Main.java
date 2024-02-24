@@ -13,16 +13,16 @@ public class Main {
         int endY = 8;
 
         //blind - depthFirst
-        //mazeBrain.blindTraverseMaze(startX, startY);
+//        mazeBrain.blindTraverseMaze(startX, startY);
 
-        //blind - best-first TODO missing 'o' cleanup after completion
-        //ArrayList<Tile> tiles = new ArrayList<>();
-        //mazeBrain.bestFirstTraverseMaze(tiles);
+        //blind - best-first
+//        ArrayList<Tile> tiles = new ArrayList<>();
+//        mazeBrain.bestFirstTraverseMaze(tiles);
 
         //heuristic A* best-first
         ArrayList<Tile> tiles = new ArrayList<>();
-        mazeBrain.printTile(7,4);
-        mazeBrain.aStar(tiles,startX,startY,7,4);
+        //mazeBrain.printTile(7,4);
+        mazeBrain.aStar(tiles,startX,startY,endX,endY);
         mazeBrain.printMaze();
 
 

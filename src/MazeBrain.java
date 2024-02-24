@@ -91,11 +91,11 @@ public class MazeBrain {
     public boolean aStar(ArrayList<Tile> tiles, int startX, int startY, int endX, int endY) {
         printAndWait(500);
         if (tiles.isEmpty()) {
-            Tile tile = new Tile(3, 3, 0); //TODO hardcode start value
+            Tile tile = new Tile(startX, startY, 0);
             tiles.add(tile);
         }
         //sort the list by price
-        Collections.sort(tiles, Comparator.comparingInt(Tile::getPrice));
+        Collections.sort(tiles, Comparator.comparingInt(Tile::getSum));
 
         Tile currentTile = tiles.get(0);
 
@@ -115,16 +115,25 @@ public class MazeBrain {
             tiles.remove(currentTile);
             return aStar(tiles, startX, startY, endX, endY);
         }
+
         Tile tileRight = new Tile(currentTile.x + 1, currentTile.y, currentTile.price + 1);
         Tile tileDown = new Tile(currentTile.x, currentTile.y + 1, currentTile.price + 1);
         Tile tileLeft = new Tile(currentTile.x - 1, currentTile.y, currentTile.price + 1);
         Tile tileUp = new Tile(currentTile.x, currentTile.y - 1, currentTile.price + 1);
 
-        tileRight.price = tileRight.price + Math.abs(endX-tileRight.x) + Math.abs(endY-tileRight.y);
-        tileDown.price = tileDown.price + Math.abs(endX-tileDown.x) + Math.abs(endY-tileDown.y);
-        tileLeft.price = tileLeft.price + Math.abs(endX-tileLeft.x) + Math.abs(endY-tileLeft.y);
-        tileUp.price = tileUp.price + Math.abs(endX-tileUp.x) + Math.abs(endY-tileUp.y);
+        //calculate the heuristic value - manhatten - amount of tiles to goal
+        tileRight.heuristic = calculateHeuristic(tileRight, endX, endY);
+        tileDown.heuristic = calculateHeuristic(tileDown, endX, endY);
+        tileLeft.heuristic = calculateHeuristic(tileLeft, endX, endY);
+        tileUp.heuristic = calculateHeuristic(tileUp, endX, endY);
 
+        //calc sum
+        tileRight.sum = tileRight.price + tileRight.heuristic;
+        tileDown.sum = tileDown.price + tileDown.heuristic;
+        tileLeft.sum = tileLeft.price + tileLeft.heuristic;
+        tileUp.sum = tileUp.price + tileUp.heuristic;
+
+        //add tiles to list
         tiles.add(tileRight);
         tiles.add(tileDown);
         tiles.add(tileLeft);
@@ -133,11 +142,10 @@ public class MazeBrain {
         //mark the current tile as visited
         maze.get(currentTile.y).set(currentTile.x, 'o');
 
-        //remove the tile from the list
+        //remove currentTile from the list
         tiles.remove(currentTile);
 
         return aStar(tiles, startX, startY, endX, endY);
-
     }
 
     public void readMazeFromFile(String filePath) {//from gpt
@@ -153,6 +161,12 @@ public class MazeBrain {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public int calculateHeuristic(Tile tile, int endX, int endY) {
+        int heuristicValue = Math.abs(endX - tile.x) + Math.abs(endY - tile.y);
+        tile.calcSum();
+        return heuristicValue;
     }
 
     public void printMaze() {//from gpt
